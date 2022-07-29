@@ -1,11 +1,13 @@
+const { renameSync } = require('fs')
 const Movie = require('../models/Movie')
 const Subscription = require('../models/Subscription')
 const User = require('../models/User')
 
 const resolvers = {
     Query:{
+        hello: ()=> "hello",
+
         async getUser(_,{id}){
-            // do mongodb find function and return
             return await User.findById(id)
         },
 
@@ -18,21 +20,34 @@ const resolvers = {
     },
 
     Mutation:{
-        async createUser(_, {userInput: {username, email, password}}){
-            console.log('hello')
-            const newUser =  new User({
-                username: username,
-                email: email,
-                password: password,
+        createUser: async(parent, args, context, info) =>{
+            const {username, email, password} = args.userInput
+            const newUser =  await User.create({
+                username,
+                email,
+                password,
                 subscriptions: [],
                 movies: []
             })
-            const res = await newUser.save()
-            
-            return{
-                id: res.id,
-                ...res._doc
-            }
+            return newUser
+        },
+        createSubscription: async(parent, {userId, subscription}, context, info) =>{
+            const sub = await Subscription.create(subscription)
+            const user = await User.findByIdAndUpdate(
+                userId, 
+                {$push:{"subscriptions":sub}},
+                {new:true}
+            )
+            return sub
+
+        },
+        addMovie: async(parent, {userId,movieId}, context, info)=>{
+            const user = await User.findByIdAndUpdate(
+                userId,
+                {$push: {"movies": movieId}},
+                {new: true}
+            )
+            return user
         }
     }
 }

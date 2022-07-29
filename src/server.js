@@ -3,22 +3,31 @@ require('dotenv').config()
 
 const express = require('express')
 const {ApolloServer} = require('apollo-server-express')
-const {typeDefs} = require('./Schema/TypeDefs')
-const {resolvers} = require('./Schema/Resolvers')
+const typeDefs = require('./Schema/TypeDefs')
+const resolvers = require('./Schema/Resolvers')
+const cors = require('cors')
 
-const app = express()
 
 const connectDB = require('./database/connect')
+const app = express()
+
+app.use(cors())
+
+const corsOptions = {
+    origin: "http://localhost:3000",
+    credentials: true
+}
 
 async function startServer(){
-    const server = new ApolloServer({
+    const apolloServer = new ApolloServer({
         typeDefs, 
         resolvers,
         introspection: true,
-        playground: true
+        playground: true,
+        cors: corsOptions
     })
-    await server.start()
-    server.applyMiddleware({app})
+    await apolloServer.start()
+    apolloServer.applyMiddleware({app})
 
 }
 
