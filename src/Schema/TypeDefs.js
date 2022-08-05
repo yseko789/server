@@ -18,12 +18,21 @@ const typeDefs = gql`
         startDate: String
         endDate: String
         reminderDate: String
+    }
 
+    type LoginResponse{
+        user: User,
+        token: String
     }
 
     input UserInput{
         username: String
         email: String
+        password: String
+    }
+
+    input LoginUser{
+        email: String,
         password: String
     }
 
@@ -41,15 +50,17 @@ const typeDefs = gql`
 
 
     type Query{
-        getUser(id: ID!): User
-        getMovies(id: ID!): [ID]
-        getSubscriptions(id: ID!): [Subscription]
+        login(loginUser: LoginUser): LoginResponse
+        getUser(userId: ID!): User
+        getMovies(userId: ID!): [ID]
+        getSubscriptions(userId: ID!): [Subscription]
         hello: String!
 
     }
 
     type Mutation{
-        createUser(userInput: UserInput): User
+        createUser(userInput: UserInput): LoginResponse
+        editUser(userId: ID, userInput: UserInput): User
         createSubscription(userId: ID, subscription: SubscriptionInput): Subscription
         addMovie(userId: ID, movieId: ID): User
     }
